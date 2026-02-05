@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Series {
+  id          String    @id @default(uuid()) // UUID is safer for scalable apps
+  title       String
+  slug        String    @unique
+  description String?
+  coverUrl    String?
+  author      String?
+  status      String    @default("ONGOING") // ONGOING, COMPLETED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  chapters    Chapter[]
+}
+
+model Chapter {
+  id        String   @id @default(uuid())
+  seriesId  String
+  series    Series   @relation(fields: [seriesId], references: [id])
+  number    Float
+  title     String?
+  slug      String
+  createdAt DateTime @default(now())
+
+  pages     Page[]
+
+  @@unique([seriesId, slug])
+}
+
+model Page {
+  id        String  @id @default(uuid())
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id])
+  imageUrl  String
+  order     Int
+
+  @@unique([chapterId, order])
+}
